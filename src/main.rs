@@ -105,8 +105,46 @@ fn compile(source: String) -> Vec<Instruction> {
     compiled_code
 }
 
-fn run(instructions: Vec<Instruction>) {
+fn run(instructions: &Vec<Instruction>, tape: &mut[u8; 30000], pointer: &mut usize) {
 
+    for operation in instructions {
+        match operation {
+            Instruction::Add => tape[*pointer] += 1,
+
+            Instruction::Subtract => tape[*pointer] -= 1,
+
+            Instruction::MoveLeft => {
+                if *pointer == 0 {
+                    *pointer = 29999;
+                } else {
+                    *pointer -= 1;
+                }
+            },
+
+            Instruction::MoveRight => {
+                if *pointer == 29999 {
+                    *pointer = 0;
+                } else {
+                    *pointer += 1;
+                }
+            },
+
+            Instruction::Write => print!("{}", tape[*pointer] as char),
+
+            Instruction::Read => {
+                let mut input: [u8; 1] = [0; 1];
+                io::stdin().read_exact(&mut input).expect("ERROR: Failed to read input.");
+                tape[*pointer] = input[0];
+            },
+
+            Instruction::Loop(loop_instructions) => {
+                while tape[*pointer] != 0 {
+                    run(loop_instructions, tape, pointer);
+                } 
+            }
+
+        }
+    }
 }
 
 fn main() {
@@ -131,5 +169,7 @@ fn main() {
     let compiled = compile(trimmed);
 
     // Run the compiled code.
-    run(compiled);
+    let mut tape: [u8; 30000] = [0; 30000];
+    let mut pointer: usize = 0;
+    run(&compiled, &mut tape, &mut pointer);
 }
