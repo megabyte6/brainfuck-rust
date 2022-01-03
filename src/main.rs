@@ -150,6 +150,11 @@ fn main() {
     // Get any arguments passed to this application.
     let args: Vec<String> = env::args().collect();
 
+    // Check to make sure a source file was given.
+    if args.len() < 1 {
+        println!("Please specify a source file.");
+    }
+
     // Read source file.
     let filename = &args[1];
     let content = fs::read_to_string(filename).expect("ERROR: Unable to read file.");
