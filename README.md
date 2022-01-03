@@ -3,6 +3,7 @@
 ## About
 Brainfuck-rust is a [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) interpreter I wrote to learn Rust.
 Inspiration taken from [Alexander Overvoorde's](https://github.com/Overv/bf) Brainfuck interpreter on GitHub.
+For more samples, see [brain-lang's examples](https://github.com/brain-lang/brainfuck/tree/master/examples). They have some pretty cool programs on there :)
 
 ## Usage
 1. [Install](https://www.rust-lang.org/tools/install) rust.
