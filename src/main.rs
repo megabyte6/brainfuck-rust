@@ -1,6 +1,5 @@
 use std::env;
 use std::fs;
-use std::io;
 use std::io::Read;
 
 enum Instruction {
@@ -133,7 +132,7 @@ fn run(instructions: &Vec<Instruction>, tape: &mut[u8; 30000], pointer: &mut usi
 
             Instruction::Read => {
                 let mut input: [u8; 1] = [0; 1];
-                io::stdin().read_exact(&mut input).expect("ERROR: Failed to read input.");
+                std::io::stdin().read_exact(&mut input).expect("ERROR: Failed to read input.");
                 tape[*pointer] = input[0];
             },
 
