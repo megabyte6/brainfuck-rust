@@ -86,8 +86,8 @@ fn compile(source: String) -> Vec<Instruction> {
             '-' => Some(Instruction::Subtract),
             '<' => Some(Instruction::MoveLeft),
             '>' => Some(Instruction::MoveRight),
-            '.' => Some(Instruction::Read),
-            ',' => Some(Instruction::Write),
+            '.' => Some(Instruction::Write),
+            ',' => Some(Instruction::Read),
             '[' => {
                 loop_stack += 1;
                 loop_begin = index;
