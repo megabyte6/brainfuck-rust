@@ -11,7 +11,7 @@ Inspiration taken from [Alexander Overvoorde's](https://github.com/Overv/bf) Bra
     - Otherwise:
         1. Click on the green "Code" button near the top of the page.
         2. Click on "Download ZIP".
-        3. Extractzip.
+        3. Extract zip folder.
 3. Navigate to the downloaded directory
 4. Run `cargo run --release samples/mandelbrot.bf`
 
