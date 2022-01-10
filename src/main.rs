@@ -33,8 +33,8 @@ fn check_loops(source: &String) -> bool {
 
     for ch in source.chars() {
         match ch {
-            '[' => count = count + 1,
-            ']' => count = count - 1,
+            '[' => count += 1,
+            ']' => count -= 1,
             _ => ()
         };
     }
