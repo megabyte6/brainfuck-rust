@@ -14,7 +14,7 @@ For more samples, see [brain-lang's examples](https://github.com/brain-lang/brai
         2. Click on "Download ZIP".
         3. Extract zip folder.
 3. Navigate to the downloaded directory
-4. Run `cargo run --release samples/mandelbrot.bf`
+4. Run `cargo run --release examples/mandelbrot.bf`
 
 ## License
 [The MIT License](https://opensource.org/licenses/MIT)
