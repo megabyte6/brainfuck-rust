@@ -36,7 +36,7 @@ fn check_loops(source: &str) -> bool {
 }
 
 fn compile(source: String) -> Vec<Instruction> {
-    let mut compiled_code: Vec<Instruction> = Vec::new();
+    let mut compiled: Vec<Instruction> = Vec::new();
 
     // How many loops are nested.
     let mut loop_stack = 0;
@@ -59,7 +59,7 @@ fn compile(source: String) -> Vec<Instruction> {
                         // Compile the code to produce an Instruction::Loop().
                         let loop_instruction = Instruction::Loop(compile(code_to_compile));
                         // Add the instruction to the compiled code.
-                        compiled_code.push(loop_instruction);
+                        compiled.push(loop_instruction);
                     }
                 }
                 _ => (),
@@ -84,43 +84,43 @@ fn compile(source: String) -> Vec<Instruction> {
         };
 
         if let Some(operation) = operation {
-            compiled_code.push(operation);
+            compiled.push(operation);
         }
     }
 
-    compiled_code
+    compiled
 }
 
-fn run(instructions: &Vec<Instruction>, tape: &mut [u8; 30000], pointer: &mut usize) {
+fn run(instructions: &Vec<Instruction>, tape: &mut [u8; 30000], index: &mut usize) {
     for operation in instructions {
         match operation {
-            Instruction::Add => tape[*pointer] += 1,
-            Instruction::Subtract => tape[*pointer] -= 1,
+            Instruction::Add => tape[*index] += 1,
+            Instruction::Subtract => tape[*index] -= 1,
             Instruction::MoveLeft => {
-                if *pointer == 0 {
-                    *pointer = 29999;
+                if *index == 0 {
+                    *index = 29999;
                 } else {
-                    *pointer -= 1;
+                    *index -= 1;
                 }
             }
             Instruction::MoveRight => {
-                if *pointer == 29999 {
-                    *pointer = 0;
+                if *index == 29999 {
+                    *index = 0;
                 } else {
-                    *pointer += 1;
+                    *index += 1;
                 }
             }
-            Instruction::Write => print!("{}", tape[*pointer] as char),
+            Instruction::Write => print!("{}", tape[*index] as char),
             Instruction::Read => {
                 let mut input: [u8; 1] = [0; 1];
                 std::io::stdin()
                     .read_exact(&mut input)
                     .expect("ERROR: Failed to read input.");
-                tape[*pointer] = input[0];
+                tape[*index] = input[0];
             }
             Instruction::Loop(loop_instructions) => {
-                while tape[*pointer] != 0 {
-                    run(loop_instructions, tape, pointer);
+                while tape[*index] != 0 {
+                    run(loop_instructions, tape, index);
                 }
             }
         }
@@ -128,20 +128,15 @@ fn run(instructions: &Vec<Instruction>, tape: &mut [u8; 30000], pointer: &mut us
 }
 
 fn main() {
-    // Get any arguments passed to this application.
     let args: Vec<String> = env::args().collect();
-
-    // Check to make sure a source file was given.
     if args.is_empty() {
         println!("Please specify a source file.");
     }
 
-    // Read source file.
-    let filename = &args[1];
-    let content = fs::read_to_string(filename).expect("ERROR: Unable to read file.");
+    let source = fs::read_to_string(&args[1]).expect("ERROR: Unable to read file.");
 
     // Trim comments and other characters from the source.
-    let trimmed = trim(content);
+    let trimmed = trim(source);
 
     // Check if all loops are complete.
     let loops_valid = check_loops(&trimmed);
@@ -155,6 +150,6 @@ fn main() {
 
     // Run the compiled code.
     let mut tape: [u8; 30000] = [0; 30000];
-    let mut pointer: usize = 0;
-    run(&compiled, &mut tape, &mut pointer);
+    let mut index: usize = 0;
+    run(&compiled, &mut tape, &mut index);
 }
