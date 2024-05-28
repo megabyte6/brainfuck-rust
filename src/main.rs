@@ -2,11 +2,24 @@ use std::env;
 use std::fs;
 use std::io::Read;
 
+use clap::Parser;
+
+enum OpCode {
+    IncrementPointer,
+    DecrementPointer,
+    Increment,
+    Decrement,
+    Write,
+    Read,
+    LoopStart,
+    LoopEnd,
+}
+
 enum Instruction {
-    Add,
-    Subtract,
-    MoveLeft,
-    MoveRight,
+    IncrementPointer,
+    DecrementPointer,
+    Increment,
+    Decrement,
     Write,
     Read,
     Loop(Vec<Instruction>),
@@ -69,10 +82,10 @@ fn compile(source: String) -> Vec<Instruction> {
         }
 
         let operation = match symbol {
-            '+' => Some(Instruction::Add),
-            '-' => Some(Instruction::Subtract),
-            '<' => Some(Instruction::MoveLeft),
-            '>' => Some(Instruction::MoveRight),
+            '>' => Some(Instruction::IncrementPointer),
+            '<' => Some(Instruction::DecrementPointer),
+            '+' => Some(Instruction::Increment),
+            '-' => Some(Instruction::Decrement),
             '.' => Some(Instruction::Write),
             ',' => Some(Instruction::Read),
             '[' => {
@@ -91,36 +104,36 @@ fn compile(source: String) -> Vec<Instruction> {
     compiled
 }
 
-fn run(instructions: &Vec<Instruction>, tape: &mut [u8; 30000], index: &mut usize) {
+fn run(instructions: &Vec<Instruction>, tape: &mut [u8; 30000], pointer: &mut usize) {
     for operation in instructions {
         match operation {
-            Instruction::Add => tape[*index] += 1,
-            Instruction::Subtract => tape[*index] -= 1,
-            Instruction::MoveLeft => {
-                if *index == 0 {
-                    *index = 29999;
+            Instruction::IncrementPointer => {
+                if *pointer == 29999 {
+                    *pointer = 0;
                 } else {
-                    *index -= 1;
+                    *pointer += 1;
                 }
             }
-            Instruction::MoveRight => {
-                if *index == 29999 {
-                    *index = 0;
+            Instruction::DecrementPointer => {
+                if *pointer == 0 {
+                    *pointer = 29999;
                 } else {
-                    *index += 1;
+                    *pointer -= 1;
                 }
             }
-            Instruction::Write => print!("{}", tape[*index] as char),
+            Instruction::Increment => tape[*pointer] += 1,
+            Instruction::Decrement => tape[*pointer] -= 1,
+            Instruction::Write => print!("{}", tape[*pointer] as char),
             Instruction::Read => {
                 let mut input: [u8; 1] = [0; 1];
                 std::io::stdin()
                     .read_exact(&mut input)
                     .expect("ERROR: Failed to read input.");
-                tape[*index] = input[0];
+                tape[*pointer] = input[0];
             }
             Instruction::Loop(loop_instructions) => {
-                while tape[*index] != 0 {
-                    run(loop_instructions, tape, index);
+                while tape[*pointer] != 0 {
+                    run(loop_instructions, tape, pointer);
                 }
             }
         }
@@ -150,6 +163,6 @@ fn main() {
 
     // Run the compiled code.
     let mut tape: [u8; 30000] = [0; 30000];
-    let mut index: usize = 0;
-    run(&compiled, &mut tape, &mut index);
+    let mut pointer: usize = 0;
+    run(&compiled, &mut tape, &mut pointer);
 }
