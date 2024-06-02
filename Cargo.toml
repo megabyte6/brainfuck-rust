@@ -8,7 +8,6 @@ homepage = "https://github.com/megabyte6/brainfuck-rust"
 description = "A compiler and interpreter for the Brainfuck esoteric programming language"
 repository = "https://github.com/megabyte6/brainfuck-rust"
 license = "MIT"
-license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
