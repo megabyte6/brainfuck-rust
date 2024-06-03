@@ -109,7 +109,7 @@ pub fn generate_intermediate(tokens: Vec<Token>) -> Result<Vec<Instruction>, Syn
             Token::Write(_) => Some(Instruction::Write),
             Token::Read(_) => Some(Instruction::Read),
             Token::LoopStart(source_location) => {
-                let end_index = match end_loop_index(&tokens, index) {
+                let end_index = match find_end_loop_index(&tokens, index) {
                     Ok(index) => index,
                     Err(error) => {
                         return Err(SyntaxError::from_source_location(
@@ -139,7 +139,7 @@ pub fn generate_intermediate(tokens: Vec<Token>) -> Result<Vec<Instruction>, Syn
 }
 
 /// Find the corresponding closing end of a given opening end of a loop.
-fn end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, LoopError> {
+fn find_end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, LoopError> {
     let mut loop_stack = 0;
 
     for (index, token) in tokens.iter().enumerate().skip(start_loop_index + 1) {
