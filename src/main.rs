@@ -10,7 +10,7 @@ use clap::Parser;
 
 use cli::{CliArgs, Command::*};
 use interpreter::execute;
-use preprocessor::{generate_intermediate, lex};
+use preprocessor::{lex, parse};
 
 fn main() {
     let args = CliArgs::parse();
@@ -20,6 +20,11 @@ fn main() {
             file,
             memory_available,
         }) => {
+            if memory_available == 0 {
+                eprintln!("Error: The amount of memory available must be greater than 0.");
+                return;
+            }
+
             if args.verbose {
                 println!("Reading file: {}", file);
             }
@@ -42,7 +47,7 @@ fn main() {
             if args.verbose {
                 println!("Generating intermediate representation...")
             }
-            let intermediate = match generate_intermediate(tokens) {
+            let instructions = match parse(tokens) {
                 Ok(intermediate) => intermediate,
                 Err(error) => {
                     eprintln!("Error: {}", error);
@@ -57,7 +62,7 @@ fn main() {
             if args.verbose {
                 println!("Running program...");
             }
-            execute(&intermediate, &mut tape, &mut pointer);
+            execute(&instructions, &mut tape, &mut pointer);
         } // TODO : Uncomment when the 'build' subcommand is implemented.
         // Some(Build { file: _, output: _ }) => {
         //     eprintln!("The 'build' subcommand is not currently implemented. Please use 'run' for the time being.");

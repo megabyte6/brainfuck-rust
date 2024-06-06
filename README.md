@@ -28,7 +28,7 @@ Brainfuck-rust is a [Brainf*ck](https://en.wikipedia.org/wiki/Brainfuck) interpr
 1. The compiled binary will be in `./target/release/`. It will be named `bf` or `bf.exe` depending on your operating system.
 
 ## License
-[The MIT License](https://opensource.org/licenses/MIT)
+[The GNU General Public License version 3](https://opensource.org/license/gpl-3-0)
 
 ## Thanks
 - [Alexander Overvoorde](https://github.com/Overv) as [bf](https://github.com/Overv/bf) was my inspiration for this project.

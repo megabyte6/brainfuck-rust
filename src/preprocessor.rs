@@ -1,3 +1,5 @@
+use std::mem::discriminant;
+
 use crate::error::{LoopError, SyntaxError};
 
 /// The location of a token in the source code.
@@ -10,10 +12,10 @@ pub struct SourceLocation {
 /// The options for tokens that are generated from the lexing process.
 #[derive(Clone, Debug)]
 pub enum Token {
-    IncrementPointer(SourceLocation),
-    DecrementPointer(SourceLocation),
-    IncrementValue(SourceLocation),
-    DecrementValue(SourceLocation),
+    MoveRight(SourceLocation),
+    MoveLeft(SourceLocation),
+    Increment(SourceLocation),
+    Decrement(SourceLocation),
     Write(SourceLocation),
     Read(SourceLocation),
     LoopStart(SourceLocation),
@@ -34,10 +36,10 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
 
     for symbol in source.chars() {
         match symbol {
-            '>' => tokens.push(Token::IncrementPointer(current_location.clone())),
-            '<' => tokens.push(Token::DecrementPointer(current_location.clone())),
-            '+' => tokens.push(Token::IncrementValue(current_location.clone())),
-            '-' => tokens.push(Token::DecrementValue(current_location.clone())),
+            '>' => tokens.push(Token::MoveRight(current_location.clone())),
+            '<' => tokens.push(Token::MoveLeft(current_location.clone())),
+            '+' => tokens.push(Token::Increment(current_location.clone())),
+            '-' => tokens.push(Token::Decrement(current_location.clone())),
             '.' => tokens.push(Token::Write(current_location.clone())),
             ',' => tokens.push(Token::Read(current_location.clone())),
             '[' => {
@@ -85,31 +87,30 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
 /// code.
 #[derive(Clone, Debug)]
 pub enum Instruction {
-    IncrementPointer,
-    DecrementPointer,
-    IncrementValue,
-    DecrementValue,
-    Write,
+    MoveRight(usize),
+    MoveLeft(usize),
+    Increment(usize),
+    Decrement(usize),
+    Write(usize),
     Read,
     Loop(Vec<Instruction>),
 }
 
 /// Generates a vector of instructions from the vector of tokens.
-pub fn generate_intermediate(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
+pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
     let mut instructions = Vec::new();
-
     let mut index = 0;
     while index < tokens.len() {
-        let token = &tokens[index];
-        let instruction = match token {
-            Token::IncrementPointer(_) => Some(Instruction::IncrementPointer),
-            Token::DecrementPointer(_) => Some(Instruction::DecrementPointer),
-            Token::IncrementValue(_) => Some(Instruction::IncrementValue),
-            Token::DecrementValue(_) => Some(Instruction::DecrementValue),
-            Token::Write(_) => Some(Instruction::Write),
-            Token::Read(_) => Some(Instruction::Read),
+        let mut count = count_repeated(&tokens[index..]);
+        let instruction = match &tokens[index] {
+            Token::MoveRight(_) => Instruction::MoveRight(count),
+            Token::MoveLeft(_) => Instruction::MoveLeft(count),
+            Token::Increment(_) => Instruction::Increment(count),
+            Token::Decrement(_) => Instruction::Decrement(count),
+            Token::Write(_) => Instruction::Write(count),
+            Token::Read(_) => Instruction::Read,
             Token::LoopStart(source_location) => {
-                let end_index = match find_end_loop_index(&tokens, index) {
+                let end_index = match end_loop_index(&tokens, index) {
                     Ok(index) => index,
                     Err(error) => {
                         return Err(SyntaxError::from_source_location(
@@ -118,9 +119,10 @@ pub fn generate_intermediate(tokens: Vec<Token>) -> Result<Vec<Instruction>, Syn
                         ))
                     }
                 };
-                let loop_content: Vec<Token> = tokens[index + 1..end_index].to_vec();
-                index = end_index;
-                Some(Instruction::Loop(generate_intermediate(loop_content)?))
+                let loop_content = tokens[index + 1..end_index].to_vec();
+                // Skip to the end of the loop
+                count = end_index - index + 1;
+                Instruction::Loop(parse(loop_content)?)
             }
             Token::LoopEnd(source_location) => {
                 return Err(SyntaxError::from_source_location(
@@ -129,19 +131,29 @@ pub fn generate_intermediate(tokens: Vec<Token>) -> Result<Vec<Instruction>, Syn
                 ));
             }
         };
-        if let Some(instruction) = instruction {
-            instructions.push(instruction);
-        }
-        index += 1;
+        instructions.push(instruction);
+        index += count;
     }
-
     Ok(instructions)
 }
 
-/// Find the corresponding closing end of a given opening end of a loop.
-fn find_end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, LoopError> {
-    let mut loop_stack = 0;
+/// Count the number of consecutive tokens of the same type from the beginning
+/// of the slice.
+fn count_repeated(tokens: &[Token]) -> usize {
+    let initial_type = discriminant(&tokens[0]);
+    let mut count = 1;
+    for token in tokens[1..].iter() {
+        if discriminant(token) != initial_type {
+            break;
+        }
+        count += 1;
+    }
+    count
+}
 
+/// Find the corresponding closing end of a given opening end of a loop.
+fn end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, LoopError> {
+    let mut loop_stack = 0;
     for (index, token) in tokens.iter().enumerate().skip(start_loop_index + 1) {
         match token {
             Token::LoopStart(_) => loop_stack += 1,
@@ -154,6 +166,5 @@ fn find_end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usiz
             _ => (),
         }
     }
-
     Err(LoopError::MissingEnder)
 }
