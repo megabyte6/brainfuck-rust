@@ -1,13 +1,13 @@
 [package]
 name = "bf"
-version = "2.0.0"
+version = "3.0.0"
 authors = [ "Brayden Chan (megabyte6)" ]
 edition = "2021"
 readme = "README.md"
 homepage = "https://github.com/megabyte6/brainfuck-rust"
 description = "A compiler and interpreter for the Brainfuck esoteric programming language"
 repository = "https://github.com/megabyte6/brainfuck-rust"
-license = "MIT"
+license = "GPL-3.0-only"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
