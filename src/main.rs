@@ -15,16 +15,13 @@ use preprocessor::{lex, parse};
 fn main() {
     let args = CliArgs::parse();
 
-    match args.command {
-        Some(Run {
-            file,
-            memory_available,
-        }) => {
-            if memory_available == 0 {
-                eprintln!("Error: The amount of memory available must be greater than 0.");
-                return;
-            }
+    if args.memory_available == 0 {
+        eprintln!("Error: The amount of memory available must be greater than 0.");
+        return;
+    }
 
+    match args.command {
+        Some(Run { file }) => {
             if args.verbose {
                 println!("Reading file: {}", file);
             }
@@ -56,17 +53,18 @@ fn main() {
                 }
             };
 
-            let mut tape = vec![0u8; memory_available];
+            let mut tape = vec![0u8; args.memory_available];
             let mut pointer: usize = 0;
 
             if args.verbose {
                 println!("Running program...");
             }
             execute(&instructions, &mut tape, &mut pointer);
-        } // TODO : Uncomment when the 'build' subcommand is implemented.
-        // Some(Build { file: _, output: _ }) => {
-        //     eprintln!("The 'build' subcommand is not currently implemented. Please use 'run' for the time being.");
-        // }
+        }
+        Some(Build { file: _, output: _ }) => {
+            // TODO : Remove when the 'build' subcommand is implemented.
+            eprintln!("The 'build' subcommand is not currently implemented. Please use 'run' for the time being.");
+        }
         None => (),
     }
 }

@@ -6,6 +6,10 @@ pub struct CliArgs {
     #[command(subcommand)]
     pub command: Option<Command>,
 
+    /// The amount of memory available to the program in cells(bytes)
+    #[arg(long, default_value_t = 30000)]
+    pub memory_available: usize,
+
     /// Print verbose information. Useful for debugging.
     #[arg(short, long)]
     pub verbose: bool,
@@ -17,13 +21,7 @@ pub enum Command {
     Run {
         /// The source file to run
         file: String,
-
-        /// The amount of memory available to the program in cells(bytes)
-        #[arg(long, default_value_t = 30000)]
-        memory_available: usize,
     },
-    // TODO : Implement the 'build' subcommand
-    /*
     /// Build the source code to an executable file
     Build {
         /// The source file to compile
@@ -33,5 +31,4 @@ pub enum Command {
         #[arg(short, long)]
         output: String,
     },
-    */
 }
