@@ -12,12 +12,12 @@ pub struct SourceLocation {
 /// The options for tokens that are generated from the lexing process.
 #[derive(Clone, Debug)]
 pub enum Token {
-    MoveRight(SourceLocation),
-    MoveLeft(SourceLocation),
-    Increment(SourceLocation),
-    Decrement(SourceLocation),
-    Write(SourceLocation),
-    Read(SourceLocation),
+    MoveRight,
+    MoveLeft,
+    Increment,
+    Decrement,
+    Write,
+    Read,
     LoopStart(SourceLocation),
     LoopEnd(SourceLocation),
 }
@@ -36,12 +36,12 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
 
     for symbol in source.chars() {
         match symbol {
-            '>' => tokens.push(Token::MoveRight(current_location.clone())),
-            '<' => tokens.push(Token::MoveLeft(current_location.clone())),
-            '+' => tokens.push(Token::Increment(current_location.clone())),
-            '-' => tokens.push(Token::Decrement(current_location.clone())),
-            '.' => tokens.push(Token::Write(current_location.clone())),
-            ',' => tokens.push(Token::Read(current_location.clone())),
+            '>' => tokens.push(Token::MoveRight),
+            '<' => tokens.push(Token::MoveLeft),
+            '+' => tokens.push(Token::Increment),
+            '-' => tokens.push(Token::Decrement),
+            '.' => tokens.push(Token::Write),
+            ',' => tokens.push(Token::Read),
             '[' => {
                 active_loops.push(current_location.clone());
                 tokens.push(Token::LoopStart(current_location.clone()))
@@ -103,12 +103,12 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
     while index < tokens.len() {
         let mut count = count_repeated(&tokens[index..]);
         let instruction = match &tokens[index] {
-            Token::MoveRight(_) => Instruction::MoveRight(count),
-            Token::MoveLeft(_) => Instruction::MoveLeft(count),
-            Token::Increment(_) => Instruction::Increment(count),
-            Token::Decrement(_) => Instruction::Decrement(count),
-            Token::Write(_) => Instruction::Write(count),
-            Token::Read(_) => Instruction::Read,
+            Token::MoveRight => Instruction::MoveRight(count),
+            Token::MoveLeft => Instruction::MoveLeft(count),
+            Token::Increment => Instruction::Increment(count),
+            Token::Decrement => Instruction::Decrement(count),
+            Token::Write => Instruction::Write(count),
+            Token::Read => Instruction::Read,
             Token::LoopStart(source_location) => {
                 let end_index = match end_loop_index(&tokens, index) {
                     Ok(index) => index,
