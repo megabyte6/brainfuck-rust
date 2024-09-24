@@ -29,46 +29,46 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
 
     // The current location of the lexer in the source code. Used to map the
     // instructions to source positions for debugging.
-    let mut current_location = SourceLocation { line: 1, column: 1 };
+    let mut source_location = SourceLocation { line: 1, column: 1 };
     // The active loops that are currently open. Used to check for missing
     // opening or closing symbols.
-    let mut active_loops = Vec::new();
+    let mut open_loops = Vec::new();
 
     for symbol in source.chars() {
         match symbol {
-            '>' => tokens.push(Token::MoveRight(current_location.clone())),
-            '<' => tokens.push(Token::MoveLeft(current_location.clone())),
-            '+' => tokens.push(Token::Increment(current_location.clone())),
-            '-' => tokens.push(Token::Decrement(current_location.clone())),
-            '.' => tokens.push(Token::Write(current_location.clone())),
-            ',' => tokens.push(Token::Read(current_location.clone())),
+            '>' => tokens.push(Token::MoveRight(source_location.clone())),
+            '<' => tokens.push(Token::MoveLeft(source_location.clone())),
+            '+' => tokens.push(Token::Increment(source_location.clone())),
+            '-' => tokens.push(Token::Decrement(source_location.clone())),
+            '.' => tokens.push(Token::Write(source_location.clone())),
+            ',' => tokens.push(Token::Read(source_location.clone())),
             '[' => {
-                active_loops.push(current_location.clone());
-                tokens.push(Token::LoopStart(current_location.clone()))
+                open_loops.push(source_location.clone());
+                tokens.push(Token::LoopStart(source_location.clone()))
             }
             ']' => {
-                if active_loops.is_empty() {
+                if open_loops.is_empty() {
                     errors.push(SyntaxError::from_source_location(
-                        &current_location,
+                        &source_location,
                         Box::new(LoopError::MissingStart),
                     ));
                     continue;
                 }
-                active_loops.pop();
-                tokens.push(Token::LoopEnd(current_location.clone()))
+                open_loops.pop();
+                tokens.push(Token::LoopEnd(source_location.clone()))
             }
             '\n' => {
-                current_location.line += 1;
-                current_location.column = 0;
+                source_location.line += 1;
+                source_location.column = 0;
             }
             _ => (),
         };
 
-        current_location.column += 1;
+        source_location.column += 1;
     }
 
-    if !active_loops.is_empty() {
-        for location in active_loops {
+    if !open_loops.is_empty() {
+        for location in open_loops {
             errors.push(SyntaxError::from_source_location(
                 &location,
                 Box::new(LoopError::MissingEnd),
