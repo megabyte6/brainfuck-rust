@@ -50,7 +50,7 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
                 if active_loops.is_empty() {
                     errors.push(SyntaxError::from_source_location(
                         &current_location,
-                        Box::new(LoopError::MissingStarter),
+                        Box::new(LoopError::MissingStart),
                     ));
                     continue;
                 }
@@ -71,7 +71,7 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
         for location in active_loops {
             errors.push(SyntaxError::from_source_location(
                 &location,
-                Box::new(LoopError::MissingEnder),
+                Box::new(LoopError::MissingEnd),
             ));
         }
     }
@@ -127,7 +127,7 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
             Token::LoopEnd(source_location) => {
                 return Err(SyntaxError::from_source_location(
                     source_location,
-                    Box::new(LoopError::MissingStarter),
+                    Box::new(LoopError::MissingStart),
                 ));
             }
         };
@@ -166,5 +166,5 @@ fn end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, Lo
             _ => (),
         }
     }
-    Err(LoopError::MissingEnder)
+    Err(LoopError::MissingEnd)
 }

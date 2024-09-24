@@ -42,16 +42,16 @@ impl Error for SyntaxError {}
 #[derive(Debug)]
 pub enum LoopError {
     /// An error that occurs when there is a missing opening loop.
-    MissingStarter,
+    MissingStart,
     /// An error that occurs when there is a missing ending loop.
-    MissingEnder,
+    MissingEnd,
 }
 
 impl Display for LoopError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            LoopError::MissingStarter => write!(f, "Missing opening loop for closing loop"),
-            LoopError::MissingEnder => write!(f, "Missing closing loop for opening loop"),
+            LoopError::MissingStart => write!(f, "Missing opening loop for closing loop"),
+            LoopError::MissingEnd => write!(f, "Missing closing loop for opening loop"),
         }
     }
 }
