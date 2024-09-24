@@ -29,10 +29,10 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
 
     // The current location of the lexer in the source code. Used to map the
     // instructions to source positions for debugging.
-    let mut current_location = SourceLocation { line: 1, column: 1 };
+    let mut source_location = SourceLocation { line: 1, column: 1 };
     // The active loops that are currently open. Used to check for missing
     // opening or closing symbols.
-    let mut active_loops = Vec::new();
+    let mut open_loops = Vec::new();
 
     for symbol in source.chars() {
         match symbol {
@@ -43,35 +43,35 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
             '.' => tokens.push(Token::Write),
             ',' => tokens.push(Token::Read),
             '[' => {
-                active_loops.push(current_location.clone());
-                tokens.push(Token::LoopStart(current_location.clone()))
+                open_loops.push(source_location.clone());
+                tokens.push(Token::LoopStart(source_location.clone()))
             }
             ']' => {
-                if active_loops.is_empty() {
+                if open_loops.is_empty() {
                     errors.push(SyntaxError::from_source_location(
-                        &current_location,
-                        Box::new(LoopError::MissingStarter),
+                        &source_location,
+                        Box::new(LoopError::MissingStart),
                     ));
                     continue;
                 }
-                active_loops.pop();
-                tokens.push(Token::LoopEnd(current_location.clone()))
+                open_loops.pop();
+                tokens.push(Token::LoopEnd(source_location.clone()))
             }
             '\n' => {
-                current_location.line += 1;
-                current_location.column = 0;
+                source_location.line += 1;
+                source_location.column = 0;
             }
             _ => (),
         };
 
-        current_location.column += 1;
+        source_location.column += 1;
     }
 
-    if !active_loops.is_empty() {
-        for location in active_loops {
+    if !open_loops.is_empty() {
+        for location in open_loops {
             errors.push(SyntaxError::from_source_location(
                 &location,
-                Box::new(LoopError::MissingEnder),
+                Box::new(LoopError::MissingEnd),
             ));
         }
     }
@@ -127,7 +127,7 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
             Token::LoopEnd(source_location) => {
                 return Err(SyntaxError::from_source_location(
                     source_location,
-                    Box::new(LoopError::MissingStarter),
+                    Box::new(LoopError::MissingStart),
                 ));
             }
         };
@@ -166,5 +166,5 @@ fn end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, Lo
             _ => (),
         }
     }
-    Err(LoopError::MissingEnder)
+    Err(LoopError::MissingEnd)
 }
