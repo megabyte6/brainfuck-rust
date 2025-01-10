@@ -1,3 +1,5 @@
+use std::num::NonZeroUsize;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -7,8 +9,8 @@ pub struct CliArgs {
     pub command: Option<Command>,
 
     /// The amount of memory available to the program in cells(bytes)
-    #[arg(long, default_value_t = 30000)]
-    pub memory_available: usize,
+    #[arg(long, default_value_t = NonZeroUsize::new(30000).expect("Default memory available is invalid."))]
+    pub memory_available: NonZeroUsize,
 
     /// Print verbose information. Useful for debugging.
     #[arg(short, long)]

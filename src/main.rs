@@ -15,56 +15,79 @@ use preprocessor::{lex, parse};
 fn main() {
     let args = CliArgs::parse();
 
-    if args.memory_available == 0 {
-        eprintln!("Error: The amount of memory available must be greater than 0.");
-        return;
+    /// A macro that conditionally prints to the console based on the verbosity
+    /// flag.
+    ///
+    /// This macro behaves like `println!` and can be used as a drop-in
+    /// replacement, but only prints the output if the `verbose` flag in the
+    /// `args` structure is set to `true`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let args = Args { verbose: true };
+    /// vprintln!("This will be printed because verbose is true.");
+    ///
+    /// let args = Args { verbose: false };
+    /// vprintln!("This will not be printed because verbose is false.");
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `$($arg:tt)*` - The format string and arguments, similar to
+    ///   `println!`.
+    ///
+    /// # Note
+    ///
+    /// The `args` structure must be in scope and contain a `verbose` field of
+    /// type `bool`.
+    macro_rules! vprintln {
+        ($($arg:tt)*) => {{
+            if args.verbose {
+                println!($($arg)*);
+            }
+        }};
     }
 
     match args.command {
-        Some(Run { file }) => {
-            if args.verbose {
-                println!("Reading file: {}", file);
-            }
-            let source = read_to_string(file).expect("Error: Unable to read file.");
+        Some(Run {
+            file,
+            memory_available,
+        }) => {
+            vprintln!("Reading file: `{}`", file);
+            let source = read_to_string(file).expect("error: unable to read file.");
 
-            if args.verbose {
-                println!("Lexing source code...");
-            }
+            vprintln!("Lexing source code...");
             let tokens = match lex(source.as_str()) {
                 Ok(tokens) => tokens,
                 Err(errors) => {
                     for error in errors {
-                        eprintln!("Error: {}", error);
+                        eprintln!("error: {}", error);
                     }
                     eprintln!("Please fix errors before continuing.");
                     return;
                 }
             };
 
-            if args.verbose {
-                println!("Generating intermediate representation...")
-            }
+            vprintln!("Generating intermediate representation...");
             let instructions = match parse(tokens) {
                 Ok(intermediate) => intermediate,
                 Err(error) => {
-                    eprintln!("Error: {}", error);
+                    eprintln!("error: {}", error);
                     eprintln!("Please fix errors before continuing.");
                     return;
                 }
             };
 
-            let mut tape = vec![0u8; args.memory_available];
+            let mut tape = vec![0u8; args.memory_available.into()];
             let mut pointer: usize = 0;
 
-            if args.verbose {
-                println!("Running program...");
-            }
+            vprintln!("Running program...");
             execute(&instructions, &mut tape, &mut pointer);
         }
         Some(Build { file: _, output: _ }) => {
-            // TODO : Remove when the 'build' subcommand is implemented.
             eprintln!("The 'build' subcommand is not currently implemented. Please use 'run' for the time being.");
         }
         None => (),
-    }
+    };
 }
