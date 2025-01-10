@@ -84,10 +84,10 @@ fn main() {
 
             vprintln!("Running program...");
             execute(&instructions, &mut tape, &mut pointer);
-        } // TODO : Uncomment when the 'build' subcommand is implemented.
-        // Some(Build { file: _, output: _ }) => {
-        //     eprintln!("The 'build' subcommand is not currently implemented. Please use 'run' for the time being.");
-        // }
+        }
+        Some(Build { file: _, output: _ }) => {
+            eprintln!("The 'build' subcommand is not currently implemented. Please use 'run' for the time being.");
+        }
         None => (),
-    }
+    };
 }

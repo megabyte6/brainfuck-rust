@@ -24,8 +24,6 @@ pub enum Command {
         #[arg(long, default_value_t = NonZeroUsize::new(30000).expect("Default memory available is invalid."))]
         memory_available: NonZeroUsize,
     },
-    // TODO : Implement the 'build' subcommand
-    /*
     /// Build the source code to an executable file
     Build {
         /// The source file to compile
@@ -35,5 +33,4 @@ pub enum Command {
         #[arg(short, long)]
         output: String,
     },
-    */
 }

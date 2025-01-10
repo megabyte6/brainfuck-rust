@@ -164,7 +164,7 @@ fn end_loop_index(tokens: &[Token], start_loop_index: usize) -> Result<usize, Lo
                 loop_stack -= 1;
             }
             _ => (),
-        }
+        };
     }
     Err(LoopError::MissingEnd)
 }
