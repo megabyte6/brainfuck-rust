@@ -55,6 +55,6 @@ pub fn execute(instructions: &Vec<Instruction>, tape: &mut Vec<u8>, pointer: &mu
                     execute(loop_instructions, tape, pointer);
                 }
             }
-        }
+        };
     }
 }
