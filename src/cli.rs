@@ -1,3 +1,5 @@
+use std::num::NonZeroUsize;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -19,8 +21,8 @@ pub enum Command {
         file: String,
 
         /// The amount of memory available to the program in cells(bytes)
-        #[arg(long, default_value_t = 30000)]
-        memory_available: usize,
+        #[arg(long, default_value_t = NonZeroUsize::new(30000).expect("Default memory available is invalid."))]
+        memory_available: NonZeroUsize,
     },
     // TODO : Implement the 'build' subcommand
     /*

@@ -20,11 +20,6 @@ fn main() {
             file,
             memory_available,
         }) => {
-            if memory_available == 0 {
-                eprintln!("Error: The amount of memory available must be greater than 0.");
-                return;
-            }
-
             if args.verbose {
                 println!("Reading file: {}", file);
             }
@@ -56,7 +51,7 @@ fn main() {
                 }
             };
 
-            let mut tape = vec![0u8; memory_available];
+            let mut tape = vec![0u8; memory_available.into()];
             let mut pointer: usize = 0;
 
             if args.verbose {
