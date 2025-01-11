@@ -50,10 +50,7 @@ fn main() {
     }
 
     match args.command {
-        Some(Run {
-            file,
-            memory_available,
-        }) => {
+        Some(Run { file }) => {
             vprintln!("Reading file: `{}`", file);
             let source = read_to_string(file).expect("error: unable to read file.");
 
