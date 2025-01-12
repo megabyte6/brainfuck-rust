@@ -4,7 +4,7 @@ mod error;
 mod interpreter;
 mod preprocessor;
 
-use std::fs::read_to_string;
+use std::{fs::read_to_string, process::exit};
 
 use clap::Parser;
 
@@ -55,26 +55,20 @@ fn main() {
             let source = read_to_string(file).expect("error: unable to read file.");
 
             vprintln!("Lexing source code...");
-            let tokens = match lex(source.as_str()) {
-                Ok(tokens) => tokens,
-                Err(errors) => {
-                    for error in errors {
-                        eprintln!("error: {}", error);
-                    }
-                    eprintln!("Please fix errors before continuing.");
-                    return;
+            let tokens = lex(source.as_str()).unwrap_or_else(|errors| {
+                for error in errors {
+                    eprintln!("error: {error}");
                 }
-            };
+                eprintln!("Please fix errors before continuing.");
+                exit(1);
+            });
 
             vprintln!("Generating intermediate representation...");
-            let instructions = match parse(tokens) {
-                Ok(intermediate) => intermediate,
-                Err(error) => {
-                    eprintln!("error: {}", error);
-                    eprintln!("Please fix errors before continuing.");
-                    return;
-                }
-            };
+            let instructions = parse(tokens).unwrap_or_else(|error| {
+                eprintln!("error: {error}");
+                eprintln!("Please fix errors before continuing.");
+                exit(1);
+            });
 
             let mut tape = vec![0u8; args.memory_available.into()];
             let mut pointer: usize = 0;

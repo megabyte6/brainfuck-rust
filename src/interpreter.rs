@@ -47,7 +47,7 @@ pub fn execute(instructions: &Vec<Instruction>, tape: &mut Vec<u8>, pointer: &mu
                 let mut input: [u8; 1] = [0];
                 stdin()
                     .read_exact(&mut input)
-                    .expect("ERROR: Failed to read input.");
+                    .expect("error: failed to read input.");
                 tape[*pointer] = input[0];
             }
             Instruction::Loop(loop_instructions) => {

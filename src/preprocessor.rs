@@ -68,12 +68,9 @@ pub fn lex(source: &str) -> Result<Vec<Token>, Vec<SyntaxError>> {
     }
 
     if !open_loops.is_empty() {
-        for location in open_loops {
-            errors.push(SyntaxError::from_source_location(
-                &location,
-                Box::new(LoopError::MissingEnd),
-            ));
-        }
+        errors.extend(open_loops.iter().map(|location| {
+            SyntaxError::from_source_location(location, Box::new(LoopError::MissingEnd))
+        }));
     }
 
     if errors.is_empty() {
@@ -110,15 +107,9 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
             Token::Write => Instruction::Write(count),
             Token::Read => Instruction::Read,
             Token::LoopStart(source_location) => {
-                let end_index = match end_loop_index(&tokens, index) {
-                    Ok(index) => index,
-                    Err(error) => {
-                        return Err(SyntaxError::from_source_location(
-                            source_location,
-                            Box::new(error),
-                        ))
-                    }
-                };
+                let end_index = end_loop_index(&tokens, index).map_err(|error| {
+                    SyntaxError::from_source_location(source_location, Box::new(error))
+                })?;
                 let loop_content = tokens[index + 1..end_index].to_vec();
                 // Skip to the end of the loop
                 count = end_index - index + 1;
@@ -141,14 +132,11 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
 /// of the slice.
 fn count_repeated(tokens: &[Token]) -> usize {
     let initial_type = discriminant(&tokens[0]);
-    let mut count = 1;
-    for token in tokens[1..].iter() {
-        if discriminant(token) != initial_type {
-            break;
-        }
-        count += 1;
-    }
-    count
+    tokens[1..]
+        .iter()
+        .take_while(|&token| discriminant(token) == initial_type)
+        .count()
+        + 1
 }
 
 /// Find the corresponding closing end of a given opening end of a loop.
