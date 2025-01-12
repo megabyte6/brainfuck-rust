@@ -141,14 +141,11 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, SyntaxError> {
 /// of the slice.
 fn count_repeated(tokens: &[Token]) -> usize {
     let initial_type = discriminant(&tokens[0]);
-    let mut count = 1;
-    for token in tokens[1..].iter() {
-        if discriminant(token) != initial_type {
-            break;
-        }
-        count += 1;
-    }
-    count
+    tokens[1..]
+        .iter()
+        .take_while(|&token| discriminant(token) == initial_type)
+        .count()
+        + 1
 }
 
 /// Find the corresponding closing end of a given opening end of a loop.
