@@ -51,7 +51,7 @@ fn main() {
 
     match args.command {
         Some(Run { file }) => {
-            vprintln!("Reading file: `{}`", file);
+            vprintln!("Reading file: `{file}`");
             let source = read_to_string(file).expect("error: unable to read file.");
 
             vprintln!("Lexing source code...");
