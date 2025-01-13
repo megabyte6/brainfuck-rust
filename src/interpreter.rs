@@ -19,12 +19,11 @@ pub fn execute(instructions: &Vec<Instruction>, tape: &mut Vec<u8>, pointer: &mu
             }
             Instruction::MoveLeft(count) => {
                 let decrement = *count % tape.len();
-                let (new_pointer, overflow) = pointer.overflowing_sub(decrement);
-                *pointer = if overflow {
-                    tape.len() - (decrement - *pointer)
+                if decrement > *pointer {
+                    *pointer = tape.len() - (decrement - *pointer);
                 } else {
-                    new_pointer
-                };
+                    *pointer -= decrement;
+                }
             }
             Instruction::Increment(count) => {
                 tape[*pointer] =
